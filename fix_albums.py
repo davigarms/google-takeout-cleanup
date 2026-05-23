@@ -4,7 +4,7 @@ import argparse
 from tqdm import tqdm
 import sys
 
-# ------------------- argumentos -------------------
+# ------------------- args -------------------
 
 parser = argparse.ArgumentParser(description="Fix missing photos by filename/hash")
 parser.add_argument("csv", nargs="?", default="missing_photos.csv", help="Missing CSV file")
@@ -20,7 +20,7 @@ PARTNER_ROOT = SOURCE_ROOT / "partner_photos"
 FIXED_CSV = SOURCE_ROOT / "fixed_photos.csv"
 MISSING_CSV = SOURCE_ROOT / "still_missing.csv"
 
-# ------------------- validações -------------------
+# ------------------- validation -------------------
 
 if not CSV_FILE.exists():
     print(f"ERROR: CSV not found: {CSV_FILE}")
@@ -30,7 +30,7 @@ if not LIBRARY_ROOT.exists():
     print(f"ERROR: library not found: {LIBRARY_ROOT}")
     sys.exit(1)
 
-# ------------------- indexação -------------------
+# ------------------- indexing -------------------
 
 print("Indexing files...")
 
@@ -41,8 +41,7 @@ def index_file(path):
     name = path.name
     filename_index.setdefault(name, []).append(path)
 
-    # opcional: usar hash se existir no CSV
-    # aqui assumimos que hash NÃO está no arquivo, então só será usado do CSV
+    # optional: use hash if available in CSV
 
 # scan library + partner_photos
 all_files = list(LIBRARY_ROOT.rglob("*")) + list(PARTNER_ROOT.rglob("*"))
@@ -53,7 +52,7 @@ for f in tqdm(all_files, desc="Scanning"):
 
 print(f"Indexed {len(filename_index)} unique filenames")
 
-# ------------------- processamento -------------------
+# ------------------- processing -------------------
 
 fixed_rows = []
 missing_rows = []
@@ -76,18 +75,17 @@ with open(CSV_FILE, newline="") as f:
 
         resolved_path = None
 
-        # --- caso 1: match único ---
+        # --- case 1: single match ---
         if len(matches) == 1:
             resolved_path = matches[0]
 
-        # --- caso 2: múltiplos → tentar hash ---
+        # --- case 2: multiple matches → try hash ---
         elif len(matches) > 1 and file_hash:
-            # tentativa simples: escolher primeiro (como você pediu)
             resolved_path = matches[0]
 
-        # --- resultado ---
+        # --- result ---
         if resolved_path:
-            # reconstruir path relativo (library ou partner_photos)
+            # rebuild relative path (library or partner_photos)
             try:
                 relative = resolved_path.relative_to(SOURCE_ROOT)
             except ValueError:
@@ -98,7 +96,7 @@ with open(CSV_FILE, newline="") as f:
         else:
             missing_rows.append(row)
 
-# ------------------- salvar -------------------
+# ------------------- save -------------------
 
 def write_csv(path, rows):
     if not rows:
@@ -111,7 +109,7 @@ def write_csv(path, rows):
 write_csv(FIXED_CSV, fixed_rows)
 write_csv(MISSING_CSV, missing_rows)
 
-# ------------------- resumo -------------------
+# ------------------- summary -------------------
 
 print("\nDone.")
 print(f"Fixed: {len(fixed_rows)}")
