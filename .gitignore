@@ -1,0 +1,29 @@
+# Takeout folders (case-insensitive, any prefix)
+*[Tt][Aa][Kk][Ee][Oo][Uu][Tt]*/
+
+# Logs
+*.log
+
+# Archives
+*.zip
+*.tar
+*.tar.gz
+*.gz
+
+# CSVs
+*.csv
+
+# Library and media output folders
+library/
+partner_photos/
+albums/
+output/
+duplicates/
+
+# macOS
+.DS_Store
+.Spotlight-V100/
+.fseventsd/
+.DocumentRevisions-V100/
+.TemporaryItems/
+.Trashes/
