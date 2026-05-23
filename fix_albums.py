@@ -81,7 +81,12 @@ with open(CSV_FILE, newline="") as f:
 
         # --- case 1: single match ---
         if len(matches) == 1:
-            resolved_path = matches[0]
+            candidate = matches[0]
+            try:
+                if not file_hash or fast_hash(candidate) == file_hash:
+                    resolved_path = candidate
+            except Exception:
+                pass
 
         # --- case 2: multiple matches → try hash ---
         elif len(matches) > 1 and file_hash:
