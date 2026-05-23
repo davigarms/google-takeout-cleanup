@@ -1,4 +1,5 @@
 import csv
+import hashlib
 from pathlib import Path
 import argparse
 from tqdm import tqdm
@@ -35,13 +36,16 @@ if not LIBRARY_ROOT.exists():
 print("Indexing files...")
 
 filename_index = {}
-hash_index = {}
+
+def fast_hash(path):
+    h = hashlib.md5()
+    with open(path, "rb") as f:
+        h.update(f.read(1024 * 1024))
+    return h.hexdigest()
 
 def index_file(path):
     name = path.name
     filename_index.setdefault(name, []).append(path)
-
-    # optional: use hash if available in CSV
 
 # scan library + partner_photos
 all_files = list(LIBRARY_ROOT.rglob("*")) + list(PARTNER_ROOT.rglob("*"))
@@ -81,7 +85,13 @@ with open(CSV_FILE, newline="") as f:
 
         # --- case 2: multiple matches → try hash ---
         elif len(matches) > 1 and file_hash:
-            resolved_path = matches[0]
+            for candidate in matches:
+                try:
+                    if fast_hash(candidate) == file_hash:
+                        resolved_path = candidate
+                        break
+                except Exception:
+                    pass
 
         # --- result ---
         if resolved_path:
